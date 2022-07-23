@@ -1,0 +1,41 @@
+package com.example.demo.user;
+
+import lombok.AllArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Optional;
+
+@Service
+@AllArgsConstructor
+public class UserService implements UserDetailsService {
+
+    private final UserRepository userRepository;
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Optional<User> pricipalUser = userRepository.findByUsername(username);
+        User user = pricipalUser.orElseThrow(
+                () -> new UsernameNotFoundException("Not found username")
+        );
+        return new org.springframework.security.core.userdetails.User(
+                user.getUsername(),
+                user.getPassword(),
+                user.isEnabled(),
+                true,
+                true,
+                true,
+                getAuthorties(UserRole.USER)
+        );
+    }
+
+    private Collection<? extends GrantedAuthority> getAuthorties(UserRole role){
+        return Collections.singletonList(new SimpleGrantedAuthority(role.name()));
+    }
+}
