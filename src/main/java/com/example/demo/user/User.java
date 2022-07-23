@@ -30,5 +30,4 @@ public class User {
     private UserRole role;
     private Instant created;
     private boolean enabled;
-
 }
